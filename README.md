@@ -1,1 +1,1 @@
-# eds-media-tagger
+# Ed's Media Tagger
