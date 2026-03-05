@@ -16,10 +16,10 @@ file record TagResponse(
 public static class Extensions
 {
     private static readonly HashSet<string> ImageExts =
-        [".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tiff", ".tif"];
+        [".jpg", ".jpeg", ".png", ".tiff", ".tif"];
 
     private static readonly HashSet<string> VideoExts =
-        [".mp4", ".mkv", ".avi", ".mov", ".webm", ".m4v", ".wmv"];
+        [".mp4"];
 
     public static bool IsImage(this string path) =>
         ImageExts.Contains(Path.GetExtension(path).ToLowerInvariant());
@@ -33,7 +33,7 @@ public static class Extensions
 
 public class GemmaMediaTagger : IDisposable
 {
-    private Dictionary<string, string[]> _fileTags = [];
+    private readonly Dictionary<string, string[]> _fileTags = [];
     private const string Model = "gemma3:12b";
 
 
@@ -308,22 +308,6 @@ public class GemmaMediaTagger : IDisposable
         Console.ForegroundColor = ConsoleColor.Yellow;
         Console.WriteLine($"  Applying Tags...");
         Console.ResetColor();
-        //foreach (var item in _fileTags)
-        //{
-        //    try
-        //    {
-        //        await ExifTool.WriteTagsAsync(item.Key, item.Value);
-        //        Console.ForegroundColor = ConsoleColor.Green;
-        //        Console.WriteLine($"  Wrote tags to {Path.GetFileName(item.Key)}");
-        //        Console.ResetColor();
-        //    }
-        //    catch (Exception)
-        //    {
-        //        Console.ForegroundColor = ConsoleColor.Red;
-        //        Console.WriteLine($"  Failed to write tags to {Path.GetFileName(item.Key)}");
-        //        Console.ResetColor();
-        //    }
-        //}
 
         await Parallel.ForEachAsync(_fileTags, async (item, ct) =>
         {
