@@ -1,6 +1,8 @@
 ﻿using EdsMediaTagger;
 using EdsMediaTagger.Helpers;
+using EdsMediaTagger.Ollama;
 using System.Diagnostics;
+using System.Numerics;
 
 // To Use: Drop folders/files on the .exe
 
@@ -19,8 +21,52 @@ Console.CancelKeyPress += (_, e) =>
     cts.Cancel();
 };
 
-var path = args.Length > 0 ? args[0] : Directory.GetCurrentDirectory();
-var tagger = new GemmaMediaTagger(); // optionally: new GemmaMediaTagger("http://localhost:11434")
+if (args.Length == 0 || string.IsNullOrEmpty(args[0]))
+{
+    Console.WriteLine("No valid path arguments found. Press any key to exit...");
+    ConsoleHelper.FlushInput();
+    Console.ReadKey();
+    return;
+}
+
+Console.WriteLine("  Models:");
+string modelChoice = "gemma3n:e4b";
+var models = OllamaDefaults.RecommendedModelsVram.Keys.ToArray();
+for (int i = 0; i < models.Length; i++)
+{
+    Console.WriteLine($"    {i}. {models[i]} ({OllamaDefaults.RecommendedModelsVram[models[i]]})");
+}
+Console.WriteLine($"  Recommended Model: {modelChoice}");
+Console.Write($"  Model Choice (0-{models.Length - 1}): ");
+if (int.TryParse(Console.ReadLine(), out var modelChoiceIndex) == false)
+{
+    Console.WriteLine("Invalid model choice. Press any key to exit...");
+    ConsoleHelper.FlushInput();
+    Console.ReadKey();
+    return;
+}
+modelChoice = models[modelChoiceIndex];
+Console.WriteLine($"  Model Choice: {modelChoice}");
+
+var path = args[0];
+var api = new OllamaApi();
+if (await api.SetModel(modelChoice) == false)
+{
+    Console.WriteLine("Model not set. Press any key to exit...");
+    ConsoleHelper.FlushInput();
+    Console.ReadKey();
+    return;
+}
+Console.WriteLine();
+
+
+var tagger = new MediaTagger(api);
+Console.WriteLine("  Overwrite existing tags? (Y/n): ");
+if (ConsoleHelper.AskYesNo())
+{
+    tagger.OverwriteExistingTags = true;
+    Console.WriteLine("  Tags will be overwritten.");
+}
 
 try
 {
@@ -29,7 +75,21 @@ try
     else if (File.Exists(path))
         await tagger.ProcessFileAsync(path, cts.Token);
     else
-        Console.WriteLine($"Path not found: {path}");
+        Console.WriteLine($"  Path not found: {path}");
+
+    Console.WriteLine($"  Done!");
+    if (tagger.FilePathErrors.Count > 0)
+    {
+        Console.WriteLine($"  Printing Errors...");
+        foreach (var item in tagger.FilePathErrors)
+        {
+            Console.WriteLine($"    ERROR FOR FILE '{item.Key.ShortPath()}': '{item.Value}'");
+        }
+    }
+
+    Console.WriteLine($"  Press any key to exit...");
+    ConsoleHelper.FlushInput();
+    Console.ReadKey();
 }
 catch (OperationCanceledException)
 {
@@ -38,12 +98,7 @@ catch (OperationCanceledException)
 
 tagger.Dispose();
 
-Console.WriteLine($"Ready to apply tags. Proceed? (Y/n): ");
-if (ConsoleHelper.AskYesNo())
-{
-    tagger.ApplyTags().Wait();
-}
+// ToDo: Check for tags before writing with 
+// Overwrite Tags? Ask
 
-Console.WriteLine($"Done! Press any key to exit...");
-ConsoleHelper.FlushInput();
-Console.ReadKey();
+// ToDo: seems like its using primarily the CPU, tho GPU is at max mem but unused.

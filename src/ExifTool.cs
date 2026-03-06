@@ -10,16 +10,25 @@ public static class ExifTool
         if (tags.Count == 0)
             return;
 
-        var args = new List<string>(tags.Count * 3 + 3)
+        var clears = new[]
         {
-            $"-XPKeywords={string.Join(";", tags)}"
+            "-XPKeywords=",
+            "-Keywords=",
+            "-Subject=",
+            "-QuickTime:Category=",
+            "-XMP-dc:Subject=",
+            "-Microsoft:Category=",
         };
+
+        var args = new List<string>(clears);
 
         foreach (var tag in tags)
             args.Add($"-Keywords={tag}");
 
         foreach (var tag in tags)
             args.Add($"-Subject={tag}");
+
+        args.Add($"-XPKeywords={string.Join(";", tags)}");
 
         // QuickTime:Category is what Windows Explorer reads as "Tags"
         args.Add($"-QuickTime:Category={string.Join(";", tags)}");
@@ -85,5 +94,29 @@ public static class ExifTool
                 $"ExifTool failed (exit code {process.ExitCode}): {error.Trim()}");
 
         return output;
+    }
+
+    public static async Task<bool> IsAlreadyTagged(string filePath)
+    {
+        var args = new List<string>
+        {
+            "-XPKeywords",
+            "-Keywords",
+            "-Subject",
+            "-QuickTime:Category",
+            "-XMP-dc:Subject",
+            "-Microsoft:Category",
+            "-s",   // short tag names
+            filePath
+        };
+        var output = await ExecuteAsync(args);
+        return output
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries)
+            .Select(line => line.Split(':', 2))
+            .Where(parts => parts.Length == 2)
+            .Select(parts => parts[1].Trim())
+            .Where(part => string.IsNullOrEmpty(part) == false)
+            .Distinct()
+            .Any();
     }
 }
