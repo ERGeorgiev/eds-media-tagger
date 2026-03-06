@@ -78,16 +78,17 @@ public class MediaTagger(OllamaApi api) : IDisposable
             }
 
             // Deduplicate tags, keeping most frequent first
-            var mergedTags = allTags
+            var tags = allTags
                 .GroupBy(t => t, StringComparer.OrdinalIgnoreCase)
                 .OrderByDescending(g => g.Count())
                 .Select(g => g.Key)
                 .Take(20)
                 .ToArray();
-            if (mergedTags.Length == 0)
+            if (tags.Length == 0)
                 throw new Exception("Output is 0 tags");
 
             await ExifTool.WriteTagsAsync(filePath, allTags);
+            Console.WriteLine($"  Wrote {tags.Length} tags ({string.Join(";", tags)}) to '{filePath.ShortPath()}'");
         }
         finally
         {
