@@ -1,8 +1,11 @@
 # Ed's Media Tagger
 
-An AI-powered command-line tool that automatically generates descriptive tags for your images and videos using a local LLM, then writes them directly into the file metadata.
+An AI-powered command-line tool that automatically generates descriptive tags for your images and videos using a local LLM, then writes them directly into the file metadata.  
+**This app processes the dropped files directly, so **BACKUP IS VERY IMPORTANT!****
 
 It uses the **Gemma 3 12B** model via [Ollama](https://ollama.com/) to analyze media content and [ExifTool](https://exiftool.org/) to embed tags across multiple metadata standards for broad compatibility.
+
+![Demo](media/demo.png)
 
 ## Features
 
