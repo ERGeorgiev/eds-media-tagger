@@ -11,7 +11,7 @@ It uses the **Gemma 3 12B** model via [Ollama](https://ollama.com/) to analyze m
 - Writes tags to multiple metadata fields (EXIF, XMP, QuickTime) for cross-platform compatibility
 - Batch-processes entire directories of media files
 - For videos, extracts multiple frames and deduplicates tags for better coverage
-- Interactive confirmation before writing tags — you always stay in control
+- Interactive confirmation before writing tags, you always stay in control
 
 ## Supported Formats
 
