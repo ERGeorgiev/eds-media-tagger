@@ -21,9 +21,6 @@ public static class ExifTool
         foreach (var tag in tags)
             args.Add($"-Subject={tag}");
 
-        args.Add("-overwrite_original");
-        args.Add(filePath);
-
         // QuickTime:Category is what Windows Explorer reads as "Tags"
         args.Add($"-QuickTime:Category={string.Join(";", tags)}");
         // Also write XMP:Subject for non-Windows tools (Lightroom, digiKam, etc.)
@@ -33,8 +30,11 @@ public static class ExifTool
         // This is what Windows Explorer reads as "Tags"
         args.Add($"-Microsoft:Category={string.Join(";", tags)}");
 
-        args.Insert(0, "-charset");
-        args.Insert(1, "filename=utf8");
+        args.Add("-overwrite_original");
+        args.Add(filePath);
+
+        args.Insert(0, "-f");
+        args.Insert(1, "-m");
 
         await ExecuteAsync(args);
     }
@@ -46,6 +46,7 @@ public static class ExifTool
             StartInfo = new ProcessStartInfo
             {
                 FileName = "exiftool",
+                RedirectStandardInput = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
@@ -55,10 +56,21 @@ public static class ExifTool
             }
         };
 
-        foreach (var arg in args)
-            process.StartInfo.ArgumentList.Add(arg);
+        // Use -@ - to read args from stdin, with UTF-8 filename charset
+        process.StartInfo.ArgumentList.Add("-charset");
+        process.StartInfo.ArgumentList.Add("filename=utf8");
+        process.StartInfo.ArgumentList.Add("-@");
+        process.StartInfo.ArgumentList.Add("-");
 
         process.Start();
+
+        // Write args to stdin as UTF-8, one per line
+        await using (var writer = new StreamWriter(
+            process.StandardInput.BaseStream, new UTF8Encoding(false)))
+        {
+            foreach (var arg in args)
+                await writer.WriteLineAsync(arg);
+        }
 
         var outputTask = process.StandardOutput.ReadToEndAsync();
         var errorTask = process.StandardError.ReadToEndAsync();

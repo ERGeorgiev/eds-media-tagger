@@ -305,23 +305,39 @@ public class GemmaMediaTagger : IDisposable
 
     public async Task ApplyTags()
     {
+        if (_fileTags.Count == 0)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($"  No tags to apply.");
+            Console.ResetColor();
+            return;
+        }
+
         Console.ForegroundColor = ConsoleColor.Yellow;
         Console.WriteLine($"  Applying Tags...");
         Console.ResetColor();
 
         await Parallel.ForEachAsync(_fileTags, async (item, ct) =>
         {
+            if (item.Value.Length == 0)
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine($"  No tags found for {Path.GetFileName(item.Key)}");
+                Console.ResetColor();
+                return;
+            }
+
             try
             {
                 await ExifTool.WriteTagsAsync(item.Key, item.Value);
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"  Wrote tags to {Path.GetFileName(item.Key)}");
+                Console.WriteLine($"  Wrote {item.Value.Length} tags to {Path.GetFileName(item.Key)}");
                 Console.ResetColor();
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"  Failed to write tags to {Path.GetFileName(item.Key)}");
+                Console.WriteLine($"  Failed to write tags to '{Path.GetFileName(item.Key)}': {e.Message}");
                 Console.ResetColor();
             }
         });
