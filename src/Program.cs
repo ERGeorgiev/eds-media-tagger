@@ -2,9 +2,14 @@
 using EdsMediaTagger.Helpers;
 using EdsMediaTagger.Ollama;
 using System.Diagnostics;
-using System.Numerics;
+using System.Reflection;
 
-// To Use: Drop folders/files on the .exe
+Console.WriteLine();
+Console.WriteLine("================================================");
+Console.WriteLine($"  Ed's Media Tagger v{Assembly.GetEntryAssembly()?.GetName().Version?.ToString(2)}");
+Console.WriteLine("  Drop file/folder on the .exe to process.");
+Console.WriteLine("================================================");
+Console.WriteLine();
 
 if (Debugger.IsAttached)
 {
