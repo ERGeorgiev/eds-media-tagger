@@ -31,48 +31,7 @@ Make sure the following are installed and available on your `PATH`:
 | [ffmpeg](https://ffmpeg.org/) | Video frame extraction | `apt install ffmpeg` / `brew install ffmpeg` / [Download](https://ffmpeg.org/download.html) |
 | [ExifTool](https://exiftool.org/) | Metadata writing | `apt install libimage-exiftool-perl` / `brew install exiftool` / [Download](https://exiftool.org/) |
 
-## Setup
-
-1. **Clone the repository**
-
-   ```bash
-   git clone https://github.com/ERGeorgiev/eds-media-tagger.git
-   cd eds-media-tagger
-   ```
-
-2. **Pull the AI model**
-
-   Start Ollama and pull the required model:
-
-   ```bash
-   ollama pull gemma3:12b
-   ```
-
-3. **Build the project**
-
-   ```bash
-   dotnet build EdsMediaTagger/EdsMediaTagger.sln
-   ```
-
-   Or create a release build:
-
-   ```bash
-   dotnet publish EdsMediaTagger/EdsMediaTagger.sln -c Release
-   ```
-
 ## Usage
-
-### Tag files in a directory
-
-```bash
-dotnet run --project EdsMediaTagger -- "/path/to/your/media/folder"
-```
-
-### Tag a single file
-
-```bash
-dotnet run --project EdsMediaTagger -- "/path/to/photo.jpg"
-```
 
 ### Drag and drop (Windows)
 
@@ -101,33 +60,3 @@ Tags are written to multiple metadata fields to ensure compatibility across diff
 | `QuickTime:Category` | macOS / iOS |
 | `Microsoft:Category` | Windows |
 
-## Configuration
-
-All settings are currently defined in source code:
-
-| Setting | Default | Location |
-|---------|---------|----------|
-| Ollama endpoint | `http://localhost:11434` | `GemmaMediaTagger.cs` |
-| AI model | `gemma3:12b` | `GemmaMediaTagger.cs` |
-| Video frames to extract | 4 | `GemmaMediaTagger.cs` |
-| Max tags per file | 20 | `GemmaMediaTagger.cs` |
-
-## Project Structure
-
-```
-eds-media-tagger/
-├── README.md
-├── LICENSE
-└── EdsMediaTagger/
-    ├── EdsMediaTagger.sln
-    ├── EdsMediaTagger.csproj
-    ├── Program.cs                 # Entry point
-    ├── GemmaMediaTagger.cs        # Core AI tagging logic
-    ├── ExifTool.cs                # Metadata writing via exiftool
-    └── Helpers/
-        └── ConsoleHelper.cs       # Console I/O utilities
-```
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).
