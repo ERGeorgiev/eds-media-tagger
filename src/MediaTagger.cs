@@ -151,10 +151,17 @@ public class MediaTagger(OllamaApi api) : IDisposable
         using var process = Process.Start(psi)
             ?? throw new InvalidOperationException($"Failed to start {exe}");
 
-        var output = await process.StandardOutput.ReadToEndAsync(ct);
+        var stdoutTask = process.StandardOutput.ReadToEndAsync(ct);
+        var stderrTask = process.StandardError.ReadToEndAsync(ct);
         await process.WaitForExitAsync(ct);
 
-        return output;
+        var stdout = await stdoutTask;
+        var stderr = await stderrTask;
+
+        if (process.ExitCode != 0)
+            throw new Exception($"{exe} failed (exit {process.ExitCode}): {stderr.Trim()}");
+
+        return stdout;
     }
 
     public async Task ProcessDirectoryAsync(string directory, CancellationToken ct = default)
