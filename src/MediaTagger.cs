@@ -73,8 +73,8 @@ public class MediaTagger(OllamaApi api) : IDisposable
             for (int i = 0; i < frames.Length; i++)
             {
                 var bytes = await File.ReadAllBytesAsync(frames[i], ct);
-                var tags = await api.GetTagsForImage(bytes, ct);
-                allTags.AddRange(tags);
+                var frameTags = await api.GetTagsForImage(bytes, ct);
+                allTags.AddRange(frameTags);
             }
 
             // Deduplicate tags, keeping most frequent first
