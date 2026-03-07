@@ -1,7 +1,5 @@
 ﻿using EdsMediaTagger.Ollama;
-using System;
 using System.Diagnostics;
-using System.IO;
 
 namespace EdsMediaTagger;
 
@@ -169,15 +167,15 @@ public class MediaTagger(OllamaApi api) : IDisposable
         var files = Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories)
             .Where(f => f.IsMedia())
             .OrderBy(f => f)
-            .ToList();
+            .ToArray();
 
-        if (files.Count == 0)
+        if (files.Length == 0)
         {
             Console.WriteLine($"  No media files found in directory '{directory}'.");
             return;
         }
 
-        Console.WriteLine($"  Processing {files.Count} media file(s) in: '{directory}'...");
+        Console.WriteLine($"  Processing {files.Length} media file(s) in: '{directory}'...");
         Console.WriteLine(new string('─', 60));
 
         int index = 0;
@@ -187,7 +185,7 @@ public class MediaTagger(OllamaApi api) : IDisposable
             index++;
 
             var relativePath = Path.GetRelativePath(directory, filePath);
-            Console.WriteLine($"  Processing [{index}/{files.Count}]: '{relativePath}'");
+            Console.WriteLine($"  Processing [{index}/{files.Length}]: '{relativePath}'");
             try
             {
                 if (filePath.IsVideo())
